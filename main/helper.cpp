@@ -3,35 +3,35 @@
 #include "helper.h"
 #include "setting.h"
 
-int readYawValue(int yawOffset) {
+int readYawValue() {
    int yawValue = -1 * CoDrone.AnalogScaleChange(analogRead(A3));
    // recalibrate the range 
    return yawValue / SCALE - yawOffset;
 }
 
-int readRollValue(int rollOffset) {
+int readRollValue() {
    int rollValue = -1 * CoDrone.AnalogScaleChange(analogRead(A4));
    // recalibrate the range 
    return rollValue / SCALE - rollOffset;
 }
 
-int readThrottleValue(int throttleOffset) {
+int readThrottleValue() {
    int throttleValue = CoDrone.AnalogScaleChange(analogRead(A5));
    // recalibrate the range 
    return throttleValue / SCALE - throttleOffset;
 }
 
-int readPitchValue(int pitchOffset) {
+int readPitchValue() {
    int pitchValue = CoDrone.AnalogScaleChange(analogRead(A6));
    // recalibrate the range 
    return pitchValue / SCALE - pitchOffset;
 }
 
 void recalibrate(){
-	yawOffset = readYawValue(0);
-	rollOffset = readRollValue(0);
-	throttleOffset = readThrottleValue(0);
-	pitchOffset = readPitchValue(0);
+	yawOffset = readYawValue();
+	rollOffset = readRollValue();
+	throttleOffset = readThrottleValue();
+	pitchOffset = readPitchValue();
 }
 
 int getLeftSensor(){
@@ -44,4 +44,24 @@ int getMiddleSensor(){
 
 int getRightSensor(){
    return analogRead(21);
+}
+
+void displaySetting(){
+   Serial.print("yawOffset : "); 
+   Serial.println(yawOffset);
+
+   Serial.print("rollOffset : "); 
+   Serial.println(rollOffset);
+   
+   Serial.print("throttleOffset : "); 
+   Serial.println(throttleOffset);
+   
+   Serial.print("pitchOffset : "); 
+   Serial.println(pitchOffset);
+   
+   Serial.print("RANGE MIN : "); 
+   Serial.println(RANGEMIN);
+   
+   Serial.print("RANGE MAX : "); 
+   Serial.println(RANGEMAX);
 }
