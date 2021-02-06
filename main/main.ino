@@ -9,6 +9,7 @@ void setup() {
 //  CoDrone.DroneModeChange(Flight);    // Changes the drone so that it is now in flight mode
   Serial.begin(9600);
   recalibrate(); // adjust any offset
+  displaySetting();
 }
 
 void loop() {
@@ -26,13 +27,6 @@ void loop() {
 //     CoDrone.land();
 //  }
 
-  Serial.print("Yaw: ");
-  Serial.println(readYawValue());
-  Serial.print("Roll: ");
-  Serial.println(readRollValue());
-  Serial.print("Throttle: ");
-  Serial.println(readThrottleValue());
-  Serial.print("Pitch : ");
-  Serial.println(readPitchValue());
+  displayMovement();
   delay(2000);
 }

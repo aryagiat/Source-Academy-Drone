@@ -65,3 +65,14 @@ void displaySetting(){
    Serial.print("RANGE MAX : "); 
    Serial.println(RANGEMAX);
 }
+
+void displayMovement(){
+   Serial.print("Yaw: ");
+   Serial.println(readYawValue());
+   Serial.print("Roll: ");
+   Serial.println(readRollValue());
+   Serial.print("Throttle: ");
+   Serial.println(readThrottleValue());
+   Serial.print("Pitch : ");
+   Serial.println(readPitchValue());   
+}

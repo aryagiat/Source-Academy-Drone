@@ -13,6 +13,7 @@ int getMiddleSensor();
 
 //Misc functions 
 void recalibrate();
-
+void displaySetting();
+void displayMovement();
 
 #endif Helper_H
