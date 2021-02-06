@@ -33,7 +33,7 @@ void loop()
   }
 
   // try to land when the right button is pressed and no others are
-  if (RIGHTESNSOR < 700)
+  if (RIGHTSENSOR < 700)
   {
      CoDrone.land();
   }
