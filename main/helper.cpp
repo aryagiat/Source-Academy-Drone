@@ -1,11 +1,7 @@
 #include <CoDrone.h>
 #include "Arduino.h"
 #include "helper.h"
-#include "Global.h"
-
-int ORISCALE = 200; // from -100 to 100
-int RANGE = 20; // from -10 to 10
-int SCALE = ORISCALE / RANGE;
+#include "setting.h"
 
 int readYawValue(int yawOffset) {
    int yawValue = -1 * CoDrone.AnalogScaleChange(analogRead(A3));

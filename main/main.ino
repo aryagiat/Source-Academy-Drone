@@ -1,15 +1,14 @@
 #include <CoDrone.h> // The codrone library that holds all the background files for this
 #include "helper.h"
 
-void setup()
-{  
+void setup() {  
   CoDrone.begin(115200);  
   CoDrone.pair(Nearest);
   CoDrone.DroneModeChange(Flight);    // Changes the drone so that it is now in flight mode
+  recalibrate(); // adjust any offset
 }
 
-void loop()
-{
+void loop() {
   //grab buttons' data
   int LEFTSENSOR = getLeftSensor();
   int RIGHTSENSOR = getRightSensor();
@@ -23,6 +22,4 @@ void loop()
   if (RIGHTSENSOR < 700) {
      CoDrone.land();
   }
-  
-  
 }
