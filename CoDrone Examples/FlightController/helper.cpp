@@ -28,10 +28,10 @@ int readPitchValue() {
 }
 
 void recalibrate(){
-	yawOffset = readYawValue();
-	rollOffset = readRollValue();
-	throttleOffset = readThrottleValue();
-	pitchOffset = readPitchValue();
+  rollOffset = CoDrone.AnalogScaleChange(analogRead(rollPort));
+  pitchOffset = CoDrone.AnalogScaleChange(analogRead(pitchPort));
+  yawOffset = CoDrone.AnalogScaleChange(analogRead(yawPort));
+  throttleOffset = CoDrone.AnalogScaleChange(analogRead(throttlePort));
 }
 
 int getLeftSensor(){

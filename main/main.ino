@@ -1,3 +1,6 @@
+#include <sinter.h>
+#include <sinter_config.h>
+
 #include <CoDrone.h> // The codrone library that holds all the background files for this
 #include "helper.h"
 
