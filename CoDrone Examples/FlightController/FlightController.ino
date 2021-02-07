@@ -17,11 +17,11 @@ void setup() {
 
 void loop() {
   //grab buttons' data
-  //int LEFTSENSOR = getLeftSensor();
+  //int MIDDLESENSOR = getMiddleSensor();
   //int RIGHTSENSOR = getRightSensor();
 
 //  // Stop when the left butotn is pressed, but none of the others are
-//  if (LEFTSENSOR < 700) {
+//  if (MIDDLESENSOR < 700) {
 //    CoDrone.emergencyStop();
 //  }
 //
