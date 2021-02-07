@@ -22,11 +22,11 @@ const byte throttlePort = A4;
 
 // Setup of the program. Only run once at the beginning
 void setup() {
-  //CoDrone.begin(115200);
-  //CoDrone.pair(Nearest);
-  //CoDrone.DroneModeChange(Flight);
+  CoDrone.begin(115200);
+  CoDrone.pair(Nearest);
+  CoDrone.DroneModeChange(Flight);
 
-  Serial.begin(9600);
+  //Serial.begin(9600);
 
   /**
    * Recalibrate controller.
@@ -88,21 +88,36 @@ void loop() {
   YAW = readJoystickValue(yawPort);
   THROTTLE = readJoystickValue(throttlePort);
 
-  if (ROLL != 0) {
-    Serial.print("ROLL: ");
-    Serial.println(ROLL);
-  } 
-  if (PITCH != 0) {
-    Serial.print("PITCH: ");
-    Serial.println(PITCH);
-  } 
-  if (YAW != 0) {
-    Serial.print("YAW: ");
-    Serial.println(YAW);
-  } 
-  if (THROTTLE != 0) {
-    Serial.print("THROTTLE: ");
-    Serial.println(THROTTLE);
-  } 
+  int MIDDLESENSOR = analogRead(20);
+  int RIGHTSENSOR = analogRead(21);
 
+//  if (ROLL != 0) {
+//    Serial.print("ROLL: ");
+//    Serial.println(ROLL);
+//  } 
+//  if (PITCH != 0) {
+//    Serial.print("PITCH: ");
+//    Serial.println(PITCH);
+//  } 
+//  if (YAW != 0) {
+//    Serial.print("YAW: ");
+//    Serial.println(YAW);
+//  } 
+//  if (THROTTLE != 0) {
+//    Serial.print("THROTTLE: ");
+//    Serial.println(THROTTLE);
+//  } 
+  
+
+  //Stop when the MIDDLE butotn is pressed, but none of the others are
+  if (MIDDLESENSOR < 100) {
+    CoDrone.emergencyStop();
+  }
+
+  // try to land when the right button is pressed and no others are
+  if (RIGHTSENSOR < 100) {
+     CoDrone.land();
+  }
+
+  CoDrone.move(ROLL, PITCH, YAW, THROTTLE);
 }
