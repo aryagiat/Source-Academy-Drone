@@ -1,4 +1,22 @@
+#include <sinter_config.h>
+#include <sinter.h>
 #include <CoDrone.h> // The codrone library that holds all the background files for this
+#include "internal_functions.h"
+#pragma GCC diagnostic warning "-fpermissive"
+#pragma GCC diagnostic ignored "-Wwrite-strings"
+
+const unsigned char hello_world_svm[] = {
+  0xad, 0xac, 0x05, 0x50, 0x00, 0x00, 0x00 ,0x00,
+  0x24, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,
+  0x01, 0x00, 0x0d, 0x00, 0x00, 0x00, 0x48, 0x65,
+  0x6c, 0x6c, 0x6f, 0x20, 0x77, 0x6f, 0x72, 0x6c,
+  0x64, 0x21, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,
+  0x0d, 0x10, 0x00, 0x00, 0x00, 0x42, 0x05, 0x01,
+  0x46
+};
+
+const unsigned int hello_world_svm_len = 49;
+char heap[0x4000];
 
 // Controller offset
 int rollOffset = 0;
@@ -30,7 +48,7 @@ void setup() {
   CoDrone.pair(Nearest);
   CoDrone.DroneModeChange(Flight);
 
-  //Serial.begin(9600);
+  Serial.begin(9600);
 
   /**
    * Recalibrate controller.
@@ -44,6 +62,7 @@ void setup() {
   pitchOffset = CoDrone.AnalogScaleChange(analogRead(pitchPort));
   yawOffset = CoDrone.AnalogScaleChange(analogRead(yawPort));
   throttleOffset = CoDrone.AnalogScaleChange(analogRead(throttlePort));
+  setupInternals();
 }
 
 /**
@@ -95,6 +114,21 @@ int readJoystickValue(byte port) {
 }
 
 void loop() {
+  sinter_setup_heap(heap, 0x4000);
+
+  sinter_value_t result;
+  sinter_fault_t fault = sinter_run(hello_world_svm, hello_world_svm_len, &result);
+
+  Serial.print("Program exited with fault ");
+  Serial.print(fault);
+  Serial.print(" and result type ");
+  Serial.print(result.type);
+  Serial.print(" (");
+  Serial.print(result.integer_value);
+  Serial.print(", ");
+  Serial.print(result.float_value);
+  Serial.print(")\n");
+  
   ROLL = readJoystickValue(rollPort);
   PITCH = readJoystickValue(pitchPort);
   YAW = readJoystickValue(yawPort);
