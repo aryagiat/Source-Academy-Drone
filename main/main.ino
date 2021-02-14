@@ -13,19 +13,19 @@ void setup() {
 }
 
 void loop() {
-  //grab buttons' data
+  //grab buttons' data for emergency setting 
   int LEFTSENSOR = getLeftSensor();
   int RIGHTSENSOR = getRightSensor();
 
   // Stop when the left butotn is pressed, but none of the others are
-//  if (LEFTSENSOR < 700) {
-//    CoDrone.emergencyStop();
-//  }
-//
-//  // try to land when the right button is pressed and no others are
-//  if (RIGHTSENSOR < 700) {
-//     CoDrone.land();
-//  }
+  if (LEFTSENSOR < 700) {
+    CoDrone.emergencyStop();
+  }
+
+  // try to land when the right button is pressed and no others are
+  if (RIGHTSENSOR < 700) {
+     CoDrone.land();
+  }
 
   displayMovement();
   delay(2000);
