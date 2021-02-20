@@ -191,7 +191,7 @@ static sinanbox_t drone_pair(uint8_t argc, sinanbox_t *argv) {
 
 static sinanbox_t emergency_stop(uint8_t argc, sinanbox_t *argv) {
   CHECK_ARGS(0);
-  CoDrone.emergency_stop();
+  CoDrone.emergencyStop();
   return NANBOX_OFUNDEF();
 }
 
@@ -208,8 +208,9 @@ static sinanbox_t takeoff(uint8_t argc, sinanbox_t *argv) {
 }
 
 static sinanbox_t hover(uint8_t argc, sinanbox_t *argv) {
-  CHECK_ARGS(0);
-  CoDrone.hover();
+  CHECK_ARGS(1);
+  unsigned int duration = nanboxToUint(argv[0]);
+  CoDrone.hover(duration);
   return NANBOX_OFUNDEF();
 }
 
