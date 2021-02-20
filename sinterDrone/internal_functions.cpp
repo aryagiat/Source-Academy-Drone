@@ -249,7 +249,7 @@ static sinanbox_t move(uint8_t argc, sinanbox_t *argv) {
 
 static sinanbox_t move_for(uint8_t argc, sinanbox_t *argv) {
   CHECK_ARGS(1);
-  unsigned int duration = nanboxToInt(argv[0]);
+  unsigned int duration = nanboxToFloat(argv[0]);
   CoDrone.move(duration);
   return NANBOX_OFUNDEF();
 }
