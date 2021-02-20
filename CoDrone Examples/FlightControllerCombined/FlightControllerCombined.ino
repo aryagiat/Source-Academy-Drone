@@ -8,8 +8,8 @@ int yawOffset = 0;
 int throttleOffset = 0;
 
 // Controller settings
-int RANGEMIN = -50;
-int RANGEMAX = 50;
+const int RANGEMIN = -50;
+const int RANGEMAX = 50;
 const int ORIRANGE = 200; // original codrone controller scale from -100 to 100.
 const int RANGE = RANGEMAX - RANGEMIN;
 const int SCALE = ORIRANGE / RANGE;
@@ -20,6 +20,10 @@ const byte pitchPort = A6;
 const byte yawPort = A3;
 const byte throttlePort = A4;
 
+// IR Sensors
+const int LEFTSENSOR = 19;
+const int MIDDLESENSOR = 20;
+const int RIGHTSENSOR = 21;
 
 // Setup of the program. Only run once at the beginning
 void setup() {
@@ -44,43 +48,51 @@ void setup() {
 }
 
 /**
+ * Reading the value of the IR sensor 
+ * @param SENSOR -- int represented by the constant
+ * @return the value by the IR 
+ */
+ 
+int readIRSensor(int Sensor) {
+  if (Sensor > 21 || Sensor < 19) {
+    // wrong input port
+    return 0;
+  }
+  int result = analogRead(Sensor);
+  return result;
+}
+
+/**
  * Reading the value of the joystick of the given port.
  * 
  * @param port -- the port of the joystick
  * @return the manipulated value of the analog joystick input.
  */
 int readJoystickValue(byte port) {
-  int analogValue = CoDrone.AnalogScaleChange(analogRead(port));
-  int result = analogValue;
+  int result = CoDrone.AnalogScaleChange(analogRead(port));
   switch (port) {
     case A5:
-      result = result - rollOffset;
-      result = result / SCALE;
-      result = -1 * result;
+      result -= rollOffset;
+      result /= -SCALE;
       break;
     case A6:
-      result = result - pitchOffset;
-      result = result / SCALE;
+      result -= pitchOffset;
+      result /= SCALE;
       break;
     case A3:
-      result = result - yawOffset;
-      result = result / SCALE;
-      result = -1 * result;
+      result -= yawOffset;
+      result /= -SCALE;
       break;
     case A4:
-      result = result - throttleOffset;
-      result = result / SCALE;
+      result -= throttleOffset;
+      result /= SCALE;
       break;
     default:
       break;
   }
   
   // Ignore if the joystick is at its default position.
-  if (result > 2 || result < -2){
-    return result;
-  } else {
-    return 0;
-  }
+  return (result > 2 || result < -2) ? result : 0;
 }
 
 void loop() {
@@ -89,8 +101,8 @@ void loop() {
   YAW = readJoystickValue(yawPort);
   THROTTLE = readJoystickValue(throttlePort);
 
-  int MIDDLESENSOR = analogRead(20);
-  int RIGHTSENSOR = analogRead(21);
+  int middleSensor = readIRSensor(MIDDLESENSOR);
+  int rightSensor = readIRSensor(RIGHTSENSOR);
 
 //  if (ROLL != 0) {
 //    Serial.print("ROLL: ");
@@ -111,12 +123,12 @@ void loop() {
   
 
   //Stop when the MIDDLE butotn is pressed, but none of the others are
-  if (MIDDLESENSOR < 100) {
+  if (middleSensor < 100) {
     CoDrone.emergencyStop();
   }
 
   // try to land when the right button is pressed and no others are
-  if (RIGHTSENSOR < 100) {
+  if (rightSensor < 100) {
      CoDrone.land();
   }
 
