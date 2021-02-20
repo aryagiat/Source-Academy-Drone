@@ -106,13 +106,6 @@ static sinanbox_t fn_delay(uint8_t argc, sinanbox_t *argv) {
   return NANBOX_OFUNDEF();
 }
 
-static sinanbox_t delay_us(uint8_t argc, sinanbox_t *argv) {
-  CHECK_ARGS(1);
-  unsigned int us = nanboxToUint(argv[0]);
-  delay(us);
-  return NANBOX_OFUNDEF();
-}
-
 static sinanbox_t fn_micros(uint8_t argc, sinanbox_t *argv) {
   return wrap_integer(micros());
 }
@@ -160,14 +153,7 @@ static sinanbox_t serial_settimeout(uint8_t argc, sinanbox_t *argv) {
   (void) argc; (void) argv;
   // TODO
   return NANBOX_OFUNDEF();
-}
-
-static sinanbox_t drone_fly(uint8_t argc, sinanbox_t *argv){                    
-  CHECK_ARGS(0);                                                                
-  CoDrone.begin(115200);                                                        
-  CoDrone.pair(Nearest);                                                        
-  return NANBOX_OFUNDEF();                                                      
-}              
+}           
  
 static sinanbox_t serial_print(uint8_t argc, sinanbox_t *argv) {
   (void) argc; (void) argv;
@@ -199,6 +185,62 @@ static sinanbox_t serial_flush(uint8_t argc, sinanbox_t *argv) {
   return NANBOX_OFUNDEF();
 }
 
+static sinanbox_t drone_pair(uint8_t argc, sinanbox_t *argv) {
+  (void) argc; (void) argv;
+  CoDrone.begin(115200);
+  CoDrone.pair(Nearest);
+  return NANBOX_OFUNDEF();
+}
+
+static sinanbox_t emergency_stop(uint8_t argc, sinanbox_t *argv) {
+  (void) argc; (void) argv;
+  CoDrone.emergencyStop();
+  return NANBOX_OFUNDEF();
+}
+
+static sinanbox_t land(uint8_t argc, sinanbox_t *argv) {
+  (void) argc; (void) argv;
+  CoDrone.land();
+  return NANBOX_OFUNDEF();
+}
+
+static sinanbox_t takeoff(uint8_t argc, sinanbox_t *argv) {
+  (void) argc; (void) argv;
+  CoDrone.takeoff();
+  return NANBOX_OFUNDEF();
+}
+
+static sinanbox_t hover(uint8_t argc, sinanbox_t *argv) {
+  CHECK_ARGS(1);
+  unsigned int duration = nanboxToUint(argv[0]);
+  CoDrone.hover(duration);
+  return NANBOX_OFUNDEF();
+}
+
+static sinanbox_t get_pitch(uint8_t argc, sinanbox_t *argv) {
+  (void) argc; (void) argv;
+  int val = CoDrone.getPitch();
+  return NANBOX_OFINT(val);
+}
+
+static sinanbox_t get_roll(uint8_t argc, sinanbox_t *argv) {
+  (void) argc; (void) argv;
+  int val = CoDrone.getRoll();
+  return NANBOX_OFINT(val);
+}
+
+static sinanbox_t get_throttle(uint8_t argc, sinanbox_t *argv) {
+  (void) argc; (void) argv;
+  int val = CoDrone.getThrottle();
+  return NANBOX_OFINT(val);
+}
+
+static sinanbox_t get_yaw(uint8_t argc, sinanbox_t *argv) {
+  (void) argc; (void) argv;
+  int val = CoDrone.getYaw();
+  return NANBOX_OFINT(val);
+}
+
 static sinanbox_t move(uint8_t argc, sinanbox_t *argv) {
   (void) argc; (void) argv;
   CoDrone.move();
@@ -207,40 +249,40 @@ static sinanbox_t move(uint8_t argc, sinanbox_t *argv) {
 
 static sinanbox_t move_for(uint8_t argc, sinanbox_t *argv) {
   CHECK_ARGS(1);
-  int duration = nanboxToInt(argv[0]);
+  unsigned int duration = nanboxToInt(argv[0]);
   CoDrone.move(duration);
   return NANBOX_OFUNDEF();
 }
 
-static sinanbox_t setPitch(uint8_t argc, sinanbox_t *argv) {
+static sinanbox_t set_pitch(uint8_t argc, sinanbox_t *argv) {
   CHECK_ARGS(1);
   int pitch = nanboxToInt(argv[0]);
   CoDrone.setPitch(pitch);
   return NANBOX_OFUNDEF();
 }
 
-static sinanbox_t setRoll(uint8_t argc, sinanbox_t *argv) {
+static sinanbox_t set_roll(uint8_t argc, sinanbox_t *argv) {
   CHECK_ARGS(1);
   int roll = nanboxToInt(argv[0]);
   CoDrone.setRoll(roll);
   return NANBOX_OFUNDEF();
 }
 
-static sinanbox_t setThrottle(uint8_t argc, sinanbox_t *argv) {
+static sinanbox_t set_throttle(uint8_t argc, sinanbox_t *argv) {
   CHECK_ARGS(1);
   int throttle = nanboxToInt(argv[0]);
   CoDrone.setThrottle(throttle);
   return NANBOX_OFUNDEF();
 }
 
-static sinanbox_t setPower(uint8_t argc, sinanbox_t *argv) {
+static sinanbox_t set_power(uint8_t argc, sinanbox_t *argv) {
   CHECK_ARGS(1);
   int power = nanboxToInt(argv[0]);
   CoDrone.setPower(power);
   return NANBOX_OFUNDEF();
 }
 
-static sinanbox_t isFlying(uint8_t argc, sinanbox_T *argv) {
+static sinanbox_t is_flying(uint8_t argc, sinanbox_T *argv) {
   (void) argc; (void) argv;
   return NANBOX_OFBOOL(CoDrone.isFlying());
 }
@@ -253,7 +295,6 @@ static const sivmfnptr_t internals[] = {
   analog_reference,
   analog_write,
   fn_delay,
-  delay_us,
   fn_micros,
   fn_millis,
   attach_interrupt,
@@ -268,13 +309,22 @@ static const sivmfnptr_t internals[] = {
   serial_read,
   serial_write,
   serial_flush,
+  drone_pair,
+  emergency_stop,
+  land,
+  takeoff,
+  hover,
+  get_pitch,
+  get_roll,
+  get_throttle,
+  get_yaw,
   move,
   move_for,
-  setPitch,
-  setRoll,
-  SetThrottle,
-  setYaw,
-  isFlying
+  set_pitch,
+  set_roll,
+  set_throttle,
+  set_yaw,
+  is_flying
 };
 
 void setupInternals() {
