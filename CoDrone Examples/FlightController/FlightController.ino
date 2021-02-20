@@ -17,18 +17,18 @@ void setup() {
 
 void loop() {
   //grab buttons' data
-  //int MIDDLESENSOR = getMiddleSensor();
-  //int RIGHTSENSOR = getRightSensor();
+  int MIDDLESENSOR = getMiddleSensor();
+  int RIGHTSENSOR = getRightSensor();
 
-//  // Stop when the left butotn is pressed, but none of the others are
-//  if (MIDDLESENSOR < 700) {
-//    CoDrone.emergencyStop();
-//  }
-//
-//  // try to land when the right button is pressed and no others are
-//  if (RIGHTSENSOR < 700) {
-//     CoDrone.land();
-//  }
+  // Stop when the left butotn is pressed, but none of the others are
+  if (MIDDLESENSOR < 100) {
+    CoDrone.emergencyStop();
+  }
+
+  // try to land when the right button is pressed and no others are
+  if (RIGHTSENSOR < 100) {
+     CoDrone.land();
+  }
 //
 //   Serial.print("Yaw: ");
 //   Serial.println(readYawValue());
@@ -43,6 +43,6 @@ void loop() {
    THROTTLE  = readThrottleValue();  // THROTTLE (height), port A4
    ROLL = readRollValue();           // ROLL (tilt left or right), port A5
    PITCH = readPitchValue();         // PITCH (tilt front or back), port A6
-   CoDrone.move(1, ROLL, PITCH, YAW, THROTTLE);
+   CoDrone.move(ROLL, PITCH, YAW, THROTTLE);
   
 }
