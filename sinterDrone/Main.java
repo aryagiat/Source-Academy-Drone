@@ -5,16 +5,17 @@ public class Main {
     FileInputStream fin = new FileInputStream("prog.svm");
 
     int len;
-    byte data[] = new byte[16];
+    byte data[] = new byte[1];
 
     // Read bytes until EOF is encountered.
-    System.out.print("[");
+    System.out.print("{");
     do {
       len = fin.read(data);
+      // by right, only 1 byte is read each time in SVM file 
       for (int j = 0; j < len; j++)
         System.out.printf("0x%02X, ", data[j]);
     } while (len != -1);
-    System.out.print("]");
+    System.out.print("}");
   }
 }
 
