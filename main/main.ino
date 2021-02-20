@@ -12,10 +12,19 @@ const unsigned char hello_world_svm[] = {
   0x6c, 0x6c, 0x6f, 0x20, 0x77, 0x6f, 0x72, 0x6c,
   0x64, 0x21, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,
   0x0d, 0x10, 0x00, 0x00, 0x00, 0x42, 0x05, 0x01,
-  0x46
+  0x46 
 };
 
+const unsigned char drone_fly_svm[] = {
+  0xad, 0xac, 0x05, 0x50, 0x00, 0x00, 0x00 ,0x00,
+  0x10, 0x00, 0x00, 0x00, 0x00 ,0x00, 0x00, 0x00,
+  0x01, 0x00, 0x00, 0x00, 0x44, 0x16, 0x00, 0x46
+};
+
+
+
 const unsigned int hello_world_svm_len = 49;
+const unsigned int drone_fly_svm_len = 24;
 char heap[0x4000];
 
 // Controller offset
@@ -44,12 +53,19 @@ const int RIGHTSENSOR = 21;
 
 // Setup of the program. Only run once at the beginning
 void setup() {
-  CoDrone.begin(115200);
-  CoDrone.pair(Nearest);
-  CoDrone.DroneModeChange(Flight);
+  // setting up serial 
+  Serial.begin(115200);
+  while(!Serial); 
 
-  Serial.begin(9600);
+  Serial.println("Begin");
+ // CoDrone.begin(115200);
 
+  // or can hardcode the address new byte[6]{0x26, 0xC5, 0xD, 0xD7, 0x93, 0x18});
+//  CoDrone.pair(Nearest);/
+//  CoDrone.DroneModeChange(Flight);
+  delay(1000);
+  Serial.println("Paired");
+  
   /**
    * Recalibrate controller.
    * 
@@ -58,11 +74,11 @@ void setup() {
    * yaw control -- port A3
    * throttle control -- port A4
    */
-  rollOffset = CoDrone.AnalogScaleChange(analogRead(rollPort));
-  pitchOffset = CoDrone.AnalogScaleChange(analogRead(pitchPort));
-  yawOffset = CoDrone.AnalogScaleChange(analogRead(yawPort));
-  throttleOffset = CoDrone.AnalogScaleChange(analogRead(throttlePort));
-  setupInternals();
+//  rollOffset = CoDrone.AnalogScaleChange(analogRead(rollPort));
+//  pitchOffset = CoDrone.AnalogScaleChange(analogRead(pitchPort));
+//  yawOffset = CoDrone.AnalogScaleChange(analogRead(yawPort));
+//  throttleOffset = CoDrone.AnalogScaleChange(analogRead(throttlePort));
+//  setupInternals();
 }
 
 /**
@@ -117,7 +133,7 @@ void loop() {
   sinter_setup_heap(heap, 0x4000);
 
   sinter_value_t result;
-  sinter_fault_t fault = sinter_run(hello_world_svm, hello_world_svm_len, &result);
+  sinter_fault_t fault = sinter_run(drone_fly_svm, drone_fly_svm_len, &result);
 
   Serial.print("Program exited with fault ");
   Serial.print(fault);
@@ -128,6 +144,8 @@ void loop() {
   Serial.print(", ");
   Serial.print(result.float_value);
   Serial.print(")\n");
+  Serial.print("Result : ");
+  Serial.println(result.string_value);
   
   ROLL = readJoystickValue(rollPort);
   PITCH = readJoystickValue(pitchPort);

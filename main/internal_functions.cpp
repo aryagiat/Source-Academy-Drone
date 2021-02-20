@@ -1,5 +1,5 @@
 #include <Arduino.h>
-
+#include <CoDrone.h>
 #include <stdint.h>
 
 #include <sinter/vm.h>
@@ -152,6 +152,13 @@ static sinanbox_t serial_settimeout(uint8_t argc, sinanbox_t *argv) {
   return NANBOX_OFUNDEF();
 }
 
+static sinanbox_t drone_fly(uint8_t argc, sinanbox_t *argv){                    
+  CHECK_ARGS(0);                                                                
+  CoDrone.begin(115200);                                                        
+  CoDrone.pair(Nearest);                                                        
+  return NANBOX_OFUNDEF();                                                      
+}              
+ 
 static sinanbox_t serial_print(uint8_t argc, sinanbox_t *argv) {
   (void) argc; (void) argv;
   // TODO
@@ -204,7 +211,8 @@ static const sivmfnptr_t internals[] = {
   serial_println,
   serial_read,
   serial_write,
-  serial_flush
+  serial_flush,
+  drone_fly
 };
 
 void setupInternals() {
