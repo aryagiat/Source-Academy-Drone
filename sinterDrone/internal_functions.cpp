@@ -257,8 +257,8 @@ static sinanbox_t move(uint8_t argc, sinanbox_t *argv) {
 
 static sinanbox_t move_for(uint8_t argc, sinanbox_t *argv) {
   CHECK_ARGS(1);
-  unsigned int duration = nanboxToInt(argv[0]);
-  CoDrone.move(duration, move, pitch, yaw, throttle);
+  float duration = nanboxToFloat(argv[0]);
+  CoDrone.move(duration, roll, pitch, yaw, throttle);
   return NANBOX_OFUNDEF();
 }
 
@@ -274,7 +274,7 @@ static sinanbox_t move_setting(uint8_t argc, sinanbox_t *argv) {
 
 static sinanbox_t move_setting_for(uint8_t argc, sinanbox_t *argv) {
   CHECK_ARGS(5);
-  unsigned int duration = nanboxToFloat(argv[0]);
+  float duration = nanboxToFloat(argv[0]);
   int roll = nanboxToInt(argv[1]);
   int pitch = nanboxToInt(argv[2]);
   int yaw = nanboxToInt(argv[3]);
