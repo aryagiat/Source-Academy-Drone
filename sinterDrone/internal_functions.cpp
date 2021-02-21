@@ -11,6 +11,18 @@
   } \
 } while (0)
 
+/*
+   ==============================================
+   Configuration of the drone 
+*/
+
+int roll = 0;
+int pitch = 0;
+int yaw = 0;
+int throttle = 0;
+
+/* ============================================== */
+
 static inline sinanbox_t wrap_integer(int v) {
   return v >= NANBOX_INTMIN && v <= NANBOX_INTMAX
     ? NANBOX_OFINT(v) : NANBOX_OFFLOAT(v);
@@ -154,7 +166,7 @@ static sinanbox_t serial_settimeout(uint8_t argc, sinanbox_t *argv) {
   // TODO
   return NANBOX_OFUNDEF();
 }           
- 
+
 static sinanbox_t serial_print(uint8_t argc, sinanbox_t *argv) {
   (void) argc; (void) argv;
   // TODO
@@ -219,66 +231,79 @@ static sinanbox_t hover(uint8_t argc, sinanbox_t *argv) {
 
 static sinanbox_t get_pitch(uint8_t argc, sinanbox_t *argv) {
   (void) argc; (void) argv;
-  int pitch = CoDrone.getPitch();
   return NANBOX_OFINT(pitch);
 }
 
 static sinanbox_t get_roll(uint8_t argc, sinanbox_t *argv) {
   (void) argc; (void) argv;
-  int roll = CoDrone.getRoll();
   return NANBOX_OFINT(roll);
 }
 
 static sinanbox_t get_throttle(uint8_t argc, sinanbox_t *argv) {
   (void) argc; (void) argv;
-  int throttle = CoDrone.getThrottle();
   return NANBOX_OFINT(throttle);
 }
 
 static sinanbox_t get_yaw(uint8_t argc, sinanbox_t *argv) {
   (void) argc; (void) argv;
-  int yaw = CoDrone.getYaw();
   return NANBOX_OFINT(yaw);
 }
 
 static sinanbox_t move(uint8_t argc, sinanbox_t *argv) {
   (void) argc; (void) argv;
-  CoDrone.move();
+  CoDrone.move(roll, pitch, yaw, throttle);
   return NANBOX_OFUNDEF();
 }
 
 static sinanbox_t move_for(uint8_t argc, sinanbox_t *argv) {
   CHECK_ARGS(1);
+  unsigned int duration = nanboxToInt(argv[0]);
+  CoDrone.move(duration, move, pitch, yaw, throttle);
+  return NANBOX_OFUNDEF();
+}
+
+static sinanbox_t move_setting(uint8_t argc, sinanbox_t *argv) {
+  CHECK_ARGS(4);
+  int roll = nanboxToInt(argv[0]);
+  int pitch = nanboxToInt(argv[1]);
+  int yaw = nanboxToInt(argv[2]);
+  int throttle = nanboxToInt(argv[3]);
+  CoDrone.move(roll, pitch, yaw, throttle);
+  return NANBOX_OFUNDEF();
+}
+
+static sinanbox_t move_setting_for(uint8_t argc, sinanbox_t *argv) {
+  CHECK_ARGS(5);
   unsigned int duration = nanboxToFloat(argv[0]);
-  CoDrone.move(duration);
+  int roll = nanboxToInt(argv[1]);
+  int pitch = nanboxToInt(argv[2]);
+  int yaw = nanboxToInt(argv[3]);
+  int throttle = nanboxToInt(argv[4]);
+  CoDrone.move(duration, roll, pitch, yaw, throttle);
   return NANBOX_OFUNDEF();
 }
 
 static sinanbox_t set_pitch(uint8_t argc, sinanbox_t *argv) {
   CHECK_ARGS(1);
-  int pitch = nanboxToInt(argv[0]);
-  CoDrone.setPitch(pitch);
+  pitch = nanboxToInt(argv[0]);
   return NANBOX_OFUNDEF();
 }
 
 static sinanbox_t set_roll(uint8_t argc, sinanbox_t *argv) {
   CHECK_ARGS(1);
-  int roll = nanboxToInt(argv[0]);
-  CoDrone.setRoll(roll);
+  roll = nanboxToInt(argv[0]);
   return NANBOX_OFUNDEF();
 }
 
 static sinanbox_t set_throttle(uint8_t argc, sinanbox_t *argv) {
   CHECK_ARGS(1);
-  int throttle = nanboxToInt(argv[0]);
-  CoDrone.setThrottle(throttle);
+  throttle = nanboxToInt(argv[0]);
   return NANBOX_OFUNDEF();
 }
 
 static sinanbox_t set_yaw(uint8_t argc, sinanbox_t *argv) {
   CHECK_ARGS(1);
-  int yaw = nanboxToInt(argv[0]);
-  CoDrone.setYaw(yaw);
+  yaw = nanboxToInt(argv[0]);
   return NANBOX_OFUNDEF();
 }
 
@@ -320,6 +345,8 @@ static const sivmfnptr_t internals[] = {
   get_yaw,
   move,
   move_for,
+  move_setting,
+  move_setting_for,
   set_pitch,
   set_roll,
   set_throttle,

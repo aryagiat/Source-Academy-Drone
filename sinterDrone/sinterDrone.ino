@@ -1,22 +1,18 @@
 #include <sinter_config.h>
 #include <sinter.h>
-#include <CoDrone.h> // The codrone library that holds all the background files for this
 #include "internal_functions.h"
 #pragma GCC diagnostic warning "-fpermissive"
 #pragma GCC diagnostic ignored "-Wwrite-strings"
 
 /*
 drone_pair();
-set_pitch(5);
-move();
+takeoff();
+land();
  */
 
 const unsigned char prog_svm[] = 
-{ 0xAD, 0xAC, 0x05, 0x50, 0x00, 0x00, 0x00, 0x00, 
-0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-0x01, 0x00, 0x00, 0x00, 0x44, 0x15, 0x00, 0x0E,
-0x44, 0x18, 0x00, 0x0E, 0x44, 0x17, 0x00, 0x46 }
-;
+{0xAD, 0xAC, 0x05, 0x50, 0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x00,
+0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x44, 0x15, 0x00, 0x0E, 0x44, 0x1E, 0x00, 0x46};
 
 
 const unsigned int prog_svm_len = (int) sizeof(prog_svm)/sizeof(prog_svm[0]);
@@ -24,7 +20,7 @@ char heap[0x4000];
 
 // Setup of the program. Only run once at the beginning
 void setup() {
-  // setting up serial 
+  // setting up serial
   Serial.begin(115200);
   while(!Serial); 
   
@@ -32,9 +28,7 @@ void setup() {
   Serial.println("Begin"); 
   delay(1000);
   setupInternals();
-}
 
-void loop() {
   sinter_setup_heap(heap, 0x4000);
   sinter_value_t result;
   sinter_fault_t fault = sinter_run(prog_svm, prog_svm_len, &result);
@@ -50,4 +44,8 @@ void loop() {
   Serial.print(")\n");
   Serial.print("Result : ");
   Serial.println(result.string_value);    
+}
+
+void loop() {
+
 }
