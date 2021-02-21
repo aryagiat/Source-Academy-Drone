@@ -226,7 +226,7 @@ static sinanbox_t takeoff(uint8_t argc, sinanbox_t *argv) {
 
 static sinanbox_t hover(uint8_t argc, sinanbox_t *argv) {
   CHECK_ARGS(1);
-  unsigned int duration = nanboxToUint(argv[0]);
+  float duration = nanboxToFloat(argv[0]);
   CoDrone.hover(duration);
   return NANBOX_OFUNDEF();
 }
