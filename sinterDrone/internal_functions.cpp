@@ -12,8 +12,8 @@
 } while (0)
 
 /*
+ * Configuration of the drone 
    ==============================================
-   Configuration of the drone 
 */
 
 int roll = 0;
@@ -29,7 +29,9 @@ static inline sinanbox_t wrap_integer(int v) {
 }
 
 static inline float nanboxToFloat(sinanbox_t v) {
-  if (NANBOX_ISFLOAT(v)) {
+  if (NANBOX_ISINT(v)) {
+    return static_cast<float>(NANBOX_INT(v));
+  } else if (NANBOX_ISFLOAT(v)) {
     return NANBOX_FLOAT(v);
   } else {
     sifault(sinter_fault_type);
