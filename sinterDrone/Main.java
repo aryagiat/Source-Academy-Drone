@@ -2,7 +2,7 @@ import java.io.FileInputStream;
 
 public class Main {
   public static void main(String[] argv) throws Exception {
-    FileInputStream fin = new FileInputStream("prog.svm");
+    FileInputStream fin = new FileInputStream("program.svm");
 
     int len;
     byte data[] = new byte[1];
