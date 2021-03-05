@@ -1,10 +1,3 @@
-/**
- * A BLE client example that is rich in capabilities.
- * There is a lot new capabilities implemented.
- * author unknown
- * updated by chegewara
- */
-
 #include "BLEDevice.h"
 #include "CoDrone.h"
 //#include "BLEScan.h"
@@ -25,49 +18,18 @@ static BLEAdvertisedDevice* myDevice;
 static void Send_Command(int sendCommand, int sendOption)
 {  
   byte _packet[9];
-  byte _crc[2];
   
   byte _cType = 0x11; // dType_Command
-  byte _len   = 0x02;
   
   //header
   _packet[0] = _cType;
-  _packet[1] = _len;
   
   //data
-  _packet[2] = sendCommand;
-  _packet[3] = sendOption;
+  _packet[1] = sendCommand;
+  _packet[2] = sendOption;
   
-  unsigned short crcCal = CoDrone.CRC16_Make(_packet, _len+2);
-  _crc[0] = (crcCal >> 8) & 0xff;
-  _crc[1] = crcCal & 0xff;
-
-  int _length = (int) sizeof(_packet)/sizeof(_packet[0]);
-  
-  Send_Processing(_packet, _len, _crc);
-}
-
-static void Send_Processing(byte _data[], byte _length, byte _crc[]) {
-  byte _packet[30];
-  // START CODE
-  _packet[0] = 0x0A;    // START1
-  _packet[1] = 0x55;    // START2
-
-  // HEADER & DATA
-  for(int i = 0; i < _length + 3 ; i++)   _packet[i+2] = _data[i];
-
-  //CRC
-  _packet[_length + 4] =_crc[1];
-  _packet[_length + 5] =_crc[0];
-
-  // data send control
-  Serial.println("_packet: ");
-  for (int i = 0; i < _length + 6; ++i) {
-    Serial.print(_packet[i]);
-    Serial.print(" ");
-  }
-  Serial.println("");
-  pRemoteCharacteristic2->writeValue(_packet, _length + 6);
+  // sending the data
+  pRemoteCharacteristic2->writeValue(_packet, 3);
 }
 
 static void notifyCallback(BLERemoteCharacteristic* pBLERemoteCharacteristic,uint8_t* pData,size_t length,bool isNotify) {
@@ -124,6 +86,14 @@ bool connectToServer() {
       return false;
     }
     Serial.println(" - Found our characteristic");
+    
+    if (pRemoteCharacteristic2 == nullptr) {
+      Serial.print("Failed to find our characteristic2 UUID: ");
+      Serial.println(charUUID2.toString().c_str());
+      pClient->disconnect();
+      return false;
+    }
+    Serial.println(" - Found our characteristic2");
 
     // Read the value of the characteristic.
     if(pRemoteCharacteristic->canRead()) {
@@ -167,7 +137,6 @@ class MyAdvertisedDeviceCallbacks: public BLEAdvertisedDeviceCallbacks {
 
 void setup() {
   Serial.begin(9600);
-  //CoDrone.begin(115200);
   Serial.println("Starting Arduino BLE Client application...");
   BLEDevice::init("");
 
@@ -201,35 +170,27 @@ void loop() {
   // If we are connected to a peer BLE Server, update the characteristic each time we are reached
   // with the current time since boot.
   if (connected) {
-    String newValue = "Time since boot: " + String(millis()/1000);
-    Serial.println("Setting new characteristic value to \"" + newValue + "\"");
-    
-    // Set the characteristic's value to be the array of bytes that is actually a string.
-    //pRemoteCharacteristic2->writeValue(newValue.c_str(), newValue.length());
-    //Send_Command(0x10, 0x10); // Change mode
-    //Send_Command(0x11, 0x02); // change mode from the HEX Test (commented)
-    //Send_Command(0x22, 0x02); // takeoff
 
-    Serial.println("control");
-    byte _control[10] = {0x0A, 0x55, 0x10, 0x04, 0x00, 0x00, 0x00, 0x00, 0x82, 0x93};
-    pRemoteCharacteristic2->writeValue(_control, 10);
-    Serial.println("controlled");
-
+    // Changing the mode of the drone to flight mode
     Serial.println("Changin mode");
-    byte _DroneModeChange[8] = {0x0A, 0x55, 0x11, 0x02, 0x10, 0x10, 0x31, 0x12};
-    pRemoteCharacteristic2->writeValue(_DroneModeChange, 8);
+    byte _DroneModeChange[8] = {0x11, 0x10, 0x10};
+    pRemoteCharacteristic2->writeValue(_DroneModeChange, 3);
     Serial.println("change mode done");
     
     delay(2000);
 
+    // Doing CoDrone.takeoff()
     Serial.println("flying");
-    byte _takeoff[8] = {0x0A, 0x55, 0x11, 0x02, 0x22, 0x01, 0xD6, 0x73};
-    pRemoteCharacteristic2->writeValue(_takeoff, 8);
+    byte _takeoff[8] = {0x11, 0x22, 0x01};
+    pRemoteCharacteristic2->writeValue(_takeoff, 3);
     Serial.println("flight done");
 
+    delay(3000);
+
+    // Doing CoDrone.land()
     Serial.println("landing");
-    byte _land[8] = {0x0A, 0x55, 0x11, 0x02, 0x22, 0x07, 0x10, 0x13};
-    pRemoteCharacteristic2->writeValue(_land, 8);
+    byte _land[8] = {0x11, 0x22, 0x07};
+    pRemoteCharacteristic2->writeValue(_land, 3);
     Serial.println("touch down");
     
     delay(5000);
