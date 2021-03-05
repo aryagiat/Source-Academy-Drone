@@ -6,29 +6,77 @@
  */
 
 #include "BLEDevice.h"
+#include "CoDrone.h"
 //#include "BLEScan.h"
 
 // The remote service we wish to connect to.
-static BLEUUID serviceUUID("c320df00-7891-11e5-8bcf-feff819cdc9f");
+static BLEUUID serviceUUID("c320df00-7891-11e5-8bcf-feff819cdc9f");     // Service UUID
 // The characteristic of the remote service we are interested in.
-static BLEUUID    charUUID("c320df01-7891-11e5-8bcf-feff819cdc9f");
+static BLEUUID    charUUID("c320df01-7891-11e5-8bcf-feff819cdc9f");     // DRONE_DATA (Drone -> Device)
+static BLEUUID    charUUID2("c320df02-7891-11e5-8bcf-feff819cdc9f");    // DRONE_CONF (Device -> Drone)
 
 static boolean doConnect = false;
 static boolean connected = false;
 static boolean doScan = false;
 static BLERemoteCharacteristic* pRemoteCharacteristic;
+static BLERemoteCharacteristic* pRemoteCharacteristic2;
 static BLEAdvertisedDevice* myDevice;
 
-static void notifyCallback(
-  BLERemoteCharacteristic* pBLERemoteCharacteristic,
-  uint8_t* pData,
-  size_t length,
-  bool isNotify) {
+static void Send_Command(int sendCommand, int sendOption)
+{  
+  byte _packet[9];
+  byte _crc[2];
+  
+  byte _cType = 0x11; // dType_Command
+  byte _len   = 0x02;
+  
+  //header
+  _packet[0] = _cType;
+  _packet[1] = _len;
+  
+  //data
+  _packet[2] = sendCommand;
+  _packet[3] = sendOption;
+  
+  unsigned short crcCal = CoDrone.CRC16_Make(_packet, _len+2);
+  _crc[0] = (crcCal >> 8) & 0xff;
+  _crc[1] = crcCal & 0xff;
+
+  int _length = (int) sizeof(_packet)/sizeof(_packet[0]);
+  
+  Send_Processing(_packet, _len, _crc);
+}
+
+static void Send_Processing(byte _data[], byte _length, byte _crc[]) {
+  byte _packet[30];
+  // START CODE
+  _packet[0] = 0x0A;    // START1
+  _packet[1] = 0x55;    // START2
+
+  // HEADER & DATA
+  for(int i = 0; i < _length + 3 ; i++)   _packet[i+2] = _data[i];
+
+  //CRC
+  _packet[_length + 4] =_crc[1];
+  _packet[_length + 5] =_crc[0];
+
+  // data send control
+  Serial.println("_packet: ");
+  for (int i = 0; i < _length + 6; ++i) {
+    Serial.print(_packet[i]);
+    Serial.print(" ");
+  }
+  Serial.println("");
+  pRemoteCharacteristic2->writeValue(_packet, _length + 6);
+}
+
+static void notifyCallback(BLERemoteCharacteristic* pBLERemoteCharacteristic,uint8_t* pData,size_t length,bool isNotify) {
     Serial.print("Notify callback for characteristic ");
     Serial.print(pBLERemoteCharacteristic->getUUID().toString().c_str());
     Serial.print(" of data length ");
     Serial.println(length);
     Serial.print("data: ");
+    //Serial.println(pRemoteCharacteristic->readValue().c_str());
     Serial.println((char*)pData);
 }
 
@@ -68,6 +116,7 @@ bool connectToServer() {
 
     // Obtain a reference to the characteristic in the service of the remote BLE server.
     pRemoteCharacteristic = pRemoteService->getCharacteristic(charUUID);
+    pRemoteCharacteristic2 = pRemoteService->getCharacteristic(charUUID2);
     if (pRemoteCharacteristic == nullptr) {
       Serial.print("Failed to find our characteristic UUID: ");
       Serial.println(charUUID.toString().c_str());
@@ -83,8 +132,11 @@ bool connectToServer() {
       Serial.println(value.c_str());
     }
 
-    if(pRemoteCharacteristic->canNotify())
-      pRemoteCharacteristic->registerForNotify(notifyCallback);
+    if(pRemoteCharacteristic->canNotify()) {
+      //pRemoteCharacteristic->registerForNotify(notifyCallback);
+      Serial.println("can notify");
+      notifyCallback(pRemoteCharacteristic,0,69,true);
+    }
 
     connected = true;
     return true;
@@ -114,7 +166,8 @@ class MyAdvertisedDeviceCallbacks: public BLEAdvertisedDeviceCallbacks {
 
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(9600);
+  //CoDrone.begin(115200);
   Serial.println("Starting Arduino BLE Client application...");
   BLEDevice::init("");
 
@@ -152,10 +205,37 @@ void loop() {
     Serial.println("Setting new characteristic value to \"" + newValue + "\"");
     
     // Set the characteristic's value to be the array of bytes that is actually a string.
-    pRemoteCharacteristic->writeValue(newValue.c_str(), newValue.length());
+    //pRemoteCharacteristic2->writeValue(newValue.c_str(), newValue.length());
+    //Send_Command(0x10, 0x10); // Change mode
+    //Send_Command(0x11, 0x02); // change mode from the HEX Test (commented)
+    //Send_Command(0x22, 0x02); // takeoff
+
+    Serial.println("control");
+    byte _control[10] = {0x0A, 0x55, 0x10, 0x04, 0x00, 0x00, 0x00, 0x00, 0x82, 0x93};
+    pRemoteCharacteristic2->writeValue(_control, 10);
+    Serial.println("controlled");
+
+    Serial.println("Changin mode");
+    byte _DroneModeChange[8] = {0x0A, 0x55, 0x11, 0x02, 0x10, 0x10, 0x31, 0x12};
+    pRemoteCharacteristic2->writeValue(_DroneModeChange, 8);
+    Serial.println("change mode done");
+    
+    delay(2000);
+
+    Serial.println("flying");
+    byte _takeoff[8] = {0x0A, 0x55, 0x11, 0x02, 0x22, 0x01, 0xD6, 0x73};
+    pRemoteCharacteristic2->writeValue(_takeoff, 8);
+    Serial.println("flight done");
+
+    Serial.println("landing");
+    byte _land[8] = {0x0A, 0x55, 0x11, 0x02, 0x22, 0x07, 0x10, 0x13};
+    pRemoteCharacteristic2->writeValue(_land, 8);
+    Serial.println("touch down");
+    
+    delay(5000);
   }else if(doScan){
     BLEDevice::getScan()->start(0);  // this is just example to start scan after disconnect, most likely there is better way to do it in arduino
   }
   
-  delay(1000); // Delay a second between loops.
+  delay(5000); // Delay a second between loops.
 } // End of loop
