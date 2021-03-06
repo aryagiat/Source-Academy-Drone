@@ -8,31 +8,24 @@
 void CoDroneClass::Send_Command(int sendCommand, int sendOption)
 {	
 	byte _packet[9];
-	byte _crc[2];
 	
 	byte _cType = dType_Command;
-	byte _len   = 0x02;  
 	
 	//header
 	_packet[0] = _cType;
-	_packet[1] = _len;
 	
 	//data
-	_packet[2] = sendCommand;
-	_packet[3] = sendOption;
+	_packet[1] = sendCommand;
+	_packet[2] = sendOption;
 	
-	unsigned short crcCal = CRC16_Make(_packet, _len+2);
-	_crc[0] = (crcCal >> 8) & 0xff;
-	_crc[1] = crcCal & 0xff;
-
 	Serial.print("send_command: ");
 	for (int i = 0; i < 9; ++i) {
 		Serial.print(_packet[i]);
 		Serial.print(" ");
 	}
 	Serial.println("");
-	
-	Send_Processing(_packet,_len,_crc);			    
+
+  pRemoteCharacteristic2->writeValue(_packet, 3);
 }
 
 void CoDroneClass::Send_Processing(byte _data[], byte _length, byte _crc[])

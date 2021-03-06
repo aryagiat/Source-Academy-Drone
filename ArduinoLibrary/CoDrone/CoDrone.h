@@ -7,6 +7,7 @@
 #ifndef CoDrone_h
 #define CoDrone_h
 #include "Arduino.h"
+#include "BLEDevice.h"
 
 /***********************************************************************/
 /*
@@ -17,6 +18,14 @@
 */
 /***********************************************************************/
 
+//////////////////////////BLE//////////////////////////////////////////
+
+static BLEUUID serviceUUID("c320df00-7891-11e5-8bcf-feff819cdc9f");     // Service UUID
+// The characteristic of the remote service we are interested in.
+static BLEUUID    charUUID("c320df01-7891-11e5-8bcf-feff819cdc9f");     // DRONE_DATA (Drone -> Device)
+static BLEUUID    charUUID2("c320df02-7891-11e5-8bcf-feff819cdc9f");    // DRONE_CONF (Device -> Drone)
+static BLERemoteCharacteristic* pRemoteCharacteristic;
+static BLERemoteCharacteristic* pRemoteCharacteristic2;
 //////////////////////////typedef///////////////////////////////////////
 
 
@@ -781,7 +790,7 @@ class CoDroneClass
 public:
 
 	//------------------------------------------------------------------------------------//
-	void begin(long baud);
+	void begin();
 
 	void Receive(void);
 
