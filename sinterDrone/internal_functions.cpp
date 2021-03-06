@@ -201,8 +201,7 @@ static sinanbox_t serial_flush(uint8_t argc, sinanbox_t *argv) {
 
 static sinanbox_t drone_pair(uint8_t argc, sinanbox_t *argv) {
   (void) argc; (void) argv;
-  CoDrone.begin(115200);
-  CoDrone.pair(Nearest);
+  CoDrone.begin();
   return NANBOX_OFUNDEF();
 }
 
