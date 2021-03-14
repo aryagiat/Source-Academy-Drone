@@ -15,28 +15,14 @@ CoDroneClass CoDrone;
 
 #include "BLEDevice.h"
 //#include "BLEScan.h"
-
 // The remote service we wish to connect to.
-static boolean doConnect = false;
-static boolean connected = false;
-static boolean doScan = false;
-static BLEAdvertisedDevice* myDevice;
-static void notifyCallback(BLERemoteCharacteristic* pBLERemoteCharacteristic,uint8_t* pData,size_t length,bool isNotify) {
-    Serial.print("Notify callback for characteristic ");
-    Serial.print(pBLERemoteCharacteristic->getUUID().toString().c_str());
-    Serial.print(" of data length ");
-    Serial.println(length);
-    Serial.print("data: ");
-    //Serial.println(pRemoteCharacteristic->readValue().c_str());
-    Serial.println((char*)pData);
-}
 
 class MyClientCallback : public BLEClientCallbacks {
   void onConnect(BLEClient* pclient) {
   }
 
   void onDisconnect(BLEClient* pclient) {
-    connected = false;
+    CoDrone.connected = false;
     Serial.println("onDisconnect");
   }
 };
@@ -51,14 +37,14 @@ bool connectToServer() {
     pClient->setClientCallbacks(new MyClientCallback());
 
     // Connect to the remove BLE Server.
-    pClient->connect(myDevice);  // if you pass BLEAdvertisedDevice instead of address, it will be recognized type of peer device address (public or private)
+    pClient->connect(CoDrone.myDevice);  // if you pass BLEAdvertisedDevice instead of address, it will be recognized type of peer device address (public or private)
     //Serial.println(" - Connected to server");
 
     // Obtain a reference to the service we are after in the remote BLE server.
     BLERemoteService* pRemoteService = pClient->getService(serviceUUID);
     if (pRemoteService == nullptr) {
-      //Serial.print("Failed to find our service UUID: ");
-      //Serial.println(serviceUUID.toString().c_str());
+      Serial.print("Failed to find our service UUID: ");
+      Serial.println(serviceUUID.toString().c_str());
       pClient->disconnect();
       return false;
     }
@@ -66,23 +52,23 @@ bool connectToServer() {
 
 
     // Obtain a reference to the characteristic in the service of the remote BLE server.
-    pRemoteCharacteristic = pRemoteService->getCharacteristic(charUUID); // read from device
-    pRemoteCharacteristic2 = pRemoteService->getCharacteristic(charUUID2); // write to device 
-
+    CoDrone.pRemoteCharacteristic = pRemoteService->getCharacteristic(charUUID); // read from device
+    CoDrone.pRemoteCharacteristic2 = pRemoteService->getCharacteristic(charUUID2); // write to device 
+     
+    CoDrone.Send_Command(cType_Request, Req_Battery);
     // Read the value of the characteristic.
-    if(pRemoteCharacteristic->canRead()) {
-      std::string value = pRemoteCharacteristic->readValue();
+    if(CoDrone.pRemoteCharacteristic->canRead()) {
+      std::string value = CoDrone.pRemoteCharacteristic->readValue();
       Serial.print("The characteristic value was: ");
       Serial.println(value.c_str());
     }
 
-    if(pRemoteCharacteristic2->canNotify()) {
+    if(CoDrone.pRemoteCharacteristic2->canNotify()) {
       //pRemoteCharacteristic->registerForNotify(notifyCallback);
       Serial.println("can notify");
-      notifyCallback(pRemoteCharacteristic2,0,69,true);
     }
 
-    connected = true;
+    CoDrone.connected = true;
     return true;
 }
 
@@ -101,9 +87,9 @@ class MyAdvertisedDeviceCallbacks: public BLEAdvertisedDeviceCallbacks {
     if (advertisedDevice.haveServiceUUID() && advertisedDevice.isAdvertisingService(serviceUUID)) {
 
       BLEDevice::getScan()->stop();
-      myDevice = new BLEAdvertisedDevice(advertisedDevice);
-      doConnect = true;
-      doScan = true;
+      CoDrone.myDevice = new BLEAdvertisedDevice(advertisedDevice);
+      CoDrone.doConnect = true;
+      CoDrone.doScan = true;
 
     } // Found our server
   } // onResult
@@ -333,9 +319,9 @@ void CoDroneClass::Send_ConnectDrone(byte mode, byte address[])
 void CoDroneClass::Receive()
 {
 	if (DRONE_SERIAL.available() > 0)
-	{
+  {
 		int	input	=	DRONE_SERIAL.read();
-
+    
 		#if	defined(DEBUG_MODE_ENABLE)
 		//	DEBUG_SERIAL.print(input,HEX);	DEBUG_SERIAL.print(" ");
 		#endif

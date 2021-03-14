@@ -26,6 +26,12 @@ void CoDroneClass::Send_Command(int sendCommand, int sendOption)
 	Serial.println("");
 
   pRemoteCharacteristic2->writeValue(_packet, 3);
+	Serial.print("send_command: ");
+	for (int i = 0; i < 9; ++i) {
+		Serial.print(_packet[i]);
+		Serial.print(" ");
+	}
+	Serial.println("");
 }
 
 void CoDroneClass::Send_Processing(byte _data[], byte _length, byte _crc[])
@@ -321,7 +327,6 @@ void CoDroneClass::move(){
 	Serial.print("move HEX: ");
 	// delay(50);
 	byte _packet[10];
-	byte _crc[2];
 	/*
   		header + data
   		data type = Control(_packet[0])
@@ -330,20 +335,13 @@ void CoDroneClass::move(){
 
   	//header
 	_packet[0] = dType_Control;
-	_packet[1] = 4;
+  _packet[1] = 4;
 
  	 //data
 	_packet[2] = roll;
 	_packet[3] = pitch;
 	_packet[4] = yaw;
 	_packet[5] = throttle;
-
-	unsigned short crcCal = CRC16_Make(_packet, _packet[1]+2);
-	_crc[0] = (crcCal >> 8) & 0xff;
-	_crc[1] = crcCal & 0xff;
-
-	//send control message to drone(write serial)
-	Send_Processing(_packet,_packet[1],_crc); 
 
 }
 
@@ -391,7 +389,6 @@ void CoDroneClass::move(int _roll, int _pitch, int _yaw, int _throttle)
 	Serial.print("move(roll, pitch, yaw, throttle) HEX: ");
 	delay(50);
 	byte _packet[10];
-	byte _crc[2];
 
 	/*
   		header + data
@@ -401,20 +398,15 @@ void CoDroneClass::move(int _roll, int _pitch, int _yaw, int _throttle)
 
   	//header
 	_packet[0] = dType_Control;
-	_packet[1] = 4;
 
  	 //data
-	_packet[2] = _roll;
-	_packet[3] = _pitch;
-	_packet[4] = _yaw;
-	_packet[5] = _throttle;
+	_packet[1] = _roll;
+	_packet[2] = _pitch;
+	_packet[3] = _yaw;
+	_packet[4] = _throttle;
 
-	unsigned short crcCal = CRC16_Make(_packet, _packet[1]+2);
-	_crc[0] = (crcCal >> 8) & 0xff;
-	_crc[1] = crcCal & 0xff;
-
-	Send_Processing(_packet,_packet[1],_crc); 
-
+	//send control message to drone(write serial)
+  pRemoteCharacteristic2 -> writeValue(_packet, 5);
 }
 
 /*

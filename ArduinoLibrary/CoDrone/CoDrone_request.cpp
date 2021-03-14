@@ -26,9 +26,9 @@ void CoDroneClass::ReceiveGetData(byte _reqType)
 	*_reqCheckType = 0;
 
 	long oldTime = millis();
-	while(!*_reqCheckType)
+  while(!*_reqCheckType)
 	{
-		Receive();
+    Receive();
 		if (oldTime + 500 < millis()) break; //time out check
 	}
 }
@@ -274,8 +274,11 @@ boolean CoDroneClass::isUpsideDown()
  */
 boolean CoDroneClass::isFlying()
 {
-	if(getState() == fMode_Flight)
-		return true;
+	if(getState() == fMode_Flight){
+    Serial.println("is Flying");
+    return true;
+  }
+  Serial.println("is not Flying");
 	return false;
 }
 
