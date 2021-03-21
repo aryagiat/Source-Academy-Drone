@@ -221,11 +221,44 @@ static sinanbox_t get_battery_voltage(uint8_t argc, sinanbox_t *argv) {
   return NANBOX_OFINT(battery);
 }
 
-// static sinanbox_t get_accleration(uint8_t argc, sinanbox_t *argv) {
-//   (void) argc; (void) argv;
-//   acceldata acc = CoDrone.getAccelerometer();
-//   return NANBOX_OFINT();
-// }
+static sinanbox_t get_accleration(uint8_t argc, sinanbox_t *argv) {
+  (void) argc; (void) argv;
+  acceldata acc = CoDrone.getAccelerometer();
+  siheap_array_t *arr = siarray_new(3);
+  siarray_put(arr, 0, acc.x);
+  siarray_put(arr, 1, acc.y);
+  siarray_put(arr, 2, acc.z);
+  return SIHEAP_PTRTONANBOX(arr);
+}
+
+static sinanbox_t get_optflow_position(uint8_t argc, sinanbox_t *argv) {
+  (void) argc; (void) argv;
+  optdata acc = CoDrone.getOptFlowPosition();
+  siheap_array_t *arr = siarray_new(2);
+  siarray_put(arr, 0, acc.x);
+  siarray_put(arr, 1, acc.y);
+  return SIHEAP_PTRTONANBOX(arr);
+}
+
+static sinanbox_t get_angular_speed(uint8_t argc, sinanbox_t *argv) {
+  (void) argc; (void) argv;
+  gyrodata acc = CoDrone.getAngularSpeed();
+  siheap_array_t *arr = siarray_new(3);
+  siarray_put(arr, 0, acc.roll);
+  siarray_put(arr, 1, acc.pitch);
+  siarray_put(arr, 2, acc.yaw);
+  return SIHEAP_PTRTONANBOX(arr);
+}
+
+static sinanbox_t get_gyro_angles(uint8_t argc, sinanbox_t *argv) {
+  (void) argc; (void) argv;
+  angledata acc = CoDrone.getGyroAngles();
+  siheap_array_t *arr = siarray_new(3);
+  siarray_put(arr, 0, acc.roll);
+  siarray_put(arr, 1, acc.pitch);
+  siarray_put(arr, 2, acc.yaw);
+  return SIHEAP_PTRTONANBOX(arr);
+}
 
 static sinanbox_t is_upside_down(uint8_t argc, sinanbox_t *argv) {
   (void) argc; (void) argv;
@@ -272,6 +305,10 @@ static const sivmfnptr_t internals[] = {
   get_height,
   get_battery_percentage,
   get_battery_voltage,
+  get_accleration,
+  get_optflow_position,
+  get_angular_speed,
+  get_gyro_angles,
   is_upside_down,
   is_ready_to_fly,
   is_low_battery
