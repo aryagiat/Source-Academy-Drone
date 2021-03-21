@@ -703,7 +703,7 @@ void CoDroneClass::goToHeight(int _range)
 	int value = getHeight();
 	if (value < _range)			_dir = 1;	// up
 	else if(value > _range)	_dir = -1;	// down
-	//---------------------------------------------------------------//
+	//-------------------------------------------------------:--------//
 	while(1)
 	{
 		value = getHeight();
