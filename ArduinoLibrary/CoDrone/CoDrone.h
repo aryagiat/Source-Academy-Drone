@@ -992,7 +992,13 @@ public:
   void getSensorData(uint8_t *pData);
   void getState(uint8_t *pData);
   void getImuRawAndAngle(uint8_t *pData);
-
+  void getTrimData(uint8_t *pData);
+  void getTrimDataAll(uint8_t *pData);
+  void getGyroBias(uint8_t *pData);
+  void getAttitudeData(uint8_t *pData);
+  void getRssiData(uint8_t *pData);
+  void getOptFlowData(uint8_t *pData);
+  void getIrMessage(uint8_t *pData);
   //------------------------------------------------------------------------------------//
   optdata getOptFlowPosition();
   acceldata getAccelerometer();

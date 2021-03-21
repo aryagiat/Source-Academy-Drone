@@ -275,6 +275,27 @@ trimdata CoDroneClass::getTrim()
 	return result;
 }
 
+void CoDroneClass::getTrimData(uint8_t *pData)
+{
+	TrimAll_Roll = ((pData[1 + 1] << 8) | (pData[0 + 1] & 0xff));
+	TrimAll_Pitch = ((pData[3 + 1] << 8) | (pData[2 + 1] & 0xff));
+	TrimAll_Yaw = ((pData[5 + 1] << 8) | (pData[4 + 1] & 0xff));
+	TrimAll_Throttle = ((pData[7 + 1] << 8) | (pData[6 + 1] & 0xff));
+
+	receiveTrimSuccess = 1;
+}
+
+void CoDroneClass::getTrimDataAll(uint8_t *pData)
+{
+	TrimAll_Roll = ((pData[1 + 1] << 8) | (pData[0 + 1] & 0xff));
+	TrimAll_Pitch = ((pData[3 + 1] << 8) | (pData[2 + 1] & 0xff));
+	TrimAll_Yaw = ((pData[5 + 1] << 8) | (pData[4 + 1] & 0xff));
+	TrimAll_Throttle = ((pData[7 + 1] << 8) | (pData[6 + 1] & 0xff));
+	TrimAll_Wheel = ((pData[9 + 1] << 8) | (pData[8 + 1] & 0xff));
+
+	receiveTrimSuccess = 1;
+}
+
 /*
  *	function	:	getOptFlowPosition()
  *	description : 	getOptFlowPosition() is function for get x,y position value from optical flow sensor.
@@ -294,6 +315,14 @@ optdata CoDroneClass::getOptFlowPosition()
 	result.x = fVelocitySumX;
 	result.y = fVelocitySumY;
 	return result;
+}
+
+void CoDroneClass::getOptFlowData(uint8_t *pData)
+{
+	fVelocitySumX = ((pData[3 + 1] << 32) | (pData[2 + 1] << 16) | (pData[1 + 1] << 8) | (pData[0 + 1] & 0xff));
+	fVelocitySumY = ((pData[7 + 1] << 32) | (pData[6 + 1] << 16) | (pData[5 + 1] << 8) | (pData[4 + 1] & 0xff));
+
+	receiveOptSuccess = 1;
 }
 
 /*
@@ -319,6 +348,15 @@ gyrodata CoDroneClass::getAngularSpeed()
 	return result;
 }
 
+void CoDroneClass::getGyroBias(uint8_t *pData)
+{
+	int GyroBias_Roll = ((pData[1 + 1] << 8) | (pData[0 + 1] & 0xff));
+	int GyroBias_Pitch = ((pData[3 + 1] << 8) | (pData[2 + 1] & 0xff));
+	int GyroBias_Yaw = ((pData[5 + 1] << 8) | (pData[4 + 1] & 0xff));
+
+	receiveGyroSuccess = 1;
+}
+
 /*
  *	function	:	getGyroAngles()
  *	description : 	getGyroAngles() is function for get angle value.
@@ -340,6 +378,29 @@ angledata CoDroneClass::getGyroAngles()
 	result.yaw = attitudeYaw;
 
 	return result;
+}
+
+void CoDroneClass::getIrMessage(uint8_t *pData)
+{
+	byte irMassageDirection = pData[0 + 1];
+
+	unsigned long _irMessge[4];
+
+	_irMessge[0] = pData[1 + 1];
+	_irMessge[1] = pData[2 + 1];
+	_irMessge[2] = pData[3 + 1];
+	_irMessge[3] = pData[4 + 1];
+
+	irMessageReceive = ((_irMessge[3] << 24) | (_irMessge[2] << 16) | (_irMessge[1] << 8) | (_irMessge[0] & 0xff));
+}
+
+void CoDroneClass::getAttitudeData(uint8_t *pData)
+{
+	attitudeRoll = ((pData[1 + 1] << 8) | (pData[0 + 1] & 0xff));
+	attitudePitch = ((pData[3 + 1] << 8) | (pData[2 + 1] & 0xff));
+	attitudeYaw = ((pData[5 + 1] << 8) | (pData[4 + 1] & 0xff));
+
+	receiveAttitudeSuccess = 1;
 }
 /*
  *	function	:	isUpsideDown()
@@ -402,6 +463,12 @@ boolean CoDroneClass::lowBatteryCheck()
 	if (getBatteryPercentage() <= 30)
 		return true;
 	return false;
+}
+
+void CoDroneClass::getRssiData(uint8_t *pData)
+{
+	rssi = pData[0 + 1];
+	rssi = rssi - 256;
 }
 
 //-------------------------------------------------------------------------------------------------------//
