@@ -189,6 +189,62 @@ static sinanbox_t is_flying(uint8_t argc, sinanbox_t *argv) {
   return NANBOX_OFBOOL(CoDrone.isFlying());
 }
 
+/* ============ Request Data Functions ================ */
+
+static sinanbox_t get_pressure(uint8_t argc, sinanbox_t *argv) {
+  (void) argc; (void) argv;
+  int pressure = CoDrone.getPressure();
+  return NANBOX_OFINT(pressure);
+}
+
+static sinanbox_t get_temperature(uint8_t argc, sinanbox_t *argv) {
+  (void) argc; (void) argv;
+  int temperature = CoDrone.getDroneTemp();
+  return NANBOX_OFINT(temperature);
+}
+
+static sinanbox_t get_height(uint8_t argc, sinanbox_t *argv) {
+  (void) argc; (void) argv;
+  int height = CoDrone.getHeight();
+  return NANBOX_OFINT(height);
+}
+
+static sinanbox_t get_battery_percentage(uint8_t argc, sinanbox_t *argv) {
+  (void) argc; (void) argv;
+  int battery = CoDrone.getBatteryPercentage();
+  return NANBOX_OFINT(battery);
+}
+
+static sinanbox_t get_battery_voltage(uint8_t argc, sinanbox_t *argv) {
+  (void) argc; (void) argv;
+  int battery = CoDrone.getBatteryVoltage();
+  return NANBOX_OFINT(battery);
+}
+
+// static sinanbox_t get_accleration(uint8_t argc, sinanbox_t *argv) {
+//   (void) argc; (void) argv;
+//   acceldata acc = CoDrone.getAccelerometer();
+//   return NANBOX_OFINT();
+// }
+
+static sinanbox_t is_upside_down(uint8_t argc, sinanbox_t *argv) {
+  (void) argc; (void) argv;
+  return NANBOX_OFBOOL(CoDrone.isUpsideDown());
+}
+
+static sinanbox_t is_ready_to_fly(uint8_t argc, sinanbox_t *argv) {
+  (void) argc; (void) argv;
+  return NANBOX_OFBOOL(CoDrone.isReadyToFly());
+}
+
+static sinanbox_t is_low_battery(uint8_t argc, sinanbox_t *argv) {
+  (void) argc; (void) argv;
+  return NANBOX_OFBOOL(CoDrone.lowBatteryCheck());
+}
+
+/* ==================================================== */
+
+
 static const sivmfnptr_t internals[] = {
   fn_delay,
   fn_micros,
@@ -210,7 +266,15 @@ static const sivmfnptr_t internals[] = {
   set_roll,
   set_throttle,
   set_yaw,
-  is_flying
+  is_flying,
+  get_pressure,
+  get_temperature,
+  get_height,
+  get_battery_percentage,
+  get_battery_voltage,
+  is_upside_down,
+  is_ready_to_fly,
+  is_low_battery
 };
 
 void setupInternals() {
