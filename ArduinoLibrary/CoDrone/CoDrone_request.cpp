@@ -10,26 +10,39 @@ void CoDroneClass::ReceiveGetData(byte _reqType)
 
 	sendCheckFlag = 1;
 	Send_Command(cType_Request, _reqType);
-	
-//---------------------------------------------------------------------------------//
-	
-	if 		(_reqType == Req_Attitude) 			_reqCheckType = &receiveAttitudeSuccess;
-	else if (_reqType == Req_Battery) 			_reqCheckType = &receiveBatterySuccess;
-	else if (_reqType == Req_Range) 			_reqCheckType = &receiveRangeSuccess;
-	else if (_reqType == Req_State) 			_reqCheckType = &receiveStateSuccess;
-	else if (_reqType == Req_ImageFlow) 		_reqCheckType = &receiveOptSuccess;
-	else if (_reqType == Req_Pressure) 			_reqCheckType = &receivePressureSuccess;
-	else if (_reqType == Req_TrimFlight) 		_reqCheckType = &receiveTrimSuccess;
-	else if (_reqType == Req_ImuRawAndAngle)	_reqCheckType = &receiveAccelSuccess;
 
-//--------------------------------------------------------------------------------//
+	//---------------------------------------------------------------------------------//
+
+	if (_reqType == Req_Attitude)
+		_reqCheckType = &receiveAttitudeSuccess;
+	else if (_reqType == Req_Battery)
+		_reqCheckType = &receiveBatterySuccess;
+	else if (_reqType == Req_Range)
+		_reqCheckType = &receiveRangeSuccess;
+	else if (_reqType == Req_State)
+		_reqCheckType = &receiveStateSuccess;
+	else if (_reqType == Req_ImageFlow)
+		_reqCheckType = &receiveOptSuccess;
+	else if (_reqType == Req_Pressure)
+		_reqCheckType = &receivePressureSuccess;
+	else if (_reqType == Req_TrimFlight)
+		_reqCheckType = &receiveTrimSuccess;
+	else if (_reqType == Req_ImuRawAndAngle)
+		_reqCheckType = &receiveAccelSuccess;
+
+	//--------------------------------------------------------------------------------//
 	*_reqCheckType = 0;
 
 	long oldTime = millis();
-  while(!*_reqCheckType)
+	while (!*_reqCheckType)
 	{
-    Receive();
-		if (oldTime + 500 < millis()) break; //time out check
+		// should call the receive upon callback of send command
+		if (oldTime + 5000 < millis())
+		{
+			// 5 seconds is the maxium time allowed
+			Serial.println("time out, data is not fetched");
+			break; //time out check
+		}
 	}
 }
 //--------------------------------------------------------------------------------//
@@ -63,6 +76,16 @@ int CoDroneClass::getDroneTemp()
 	return temperature;
 }
 
+void CoDroneClass::getPressureTempData(uint8_t *pData)
+{
+	long d1 = ((pData[3 + 1] << 32) | (pData[2 + 1] << 16) | (pData[1 + 1] << 8) | (pData[0 + 1] & 0xff));
+	long d2 = ((pData[7 + 1] << 32) | (pData[6 + 1] << 16) | (pData[5 + 1] << 8) | (pData[4 + 1] & 0xff));
+	temperature = ((pData[11 + 1] << 32) | (pData[10 + 1] << 16) | (pData[9 + 1] << 8) | (pData[8 + 1] & 0xff));
+	pressure = ((pData[15 + 1] << 32) | (pData[14 + 1] << 16) | (pData[13 + 1] << 8) | (pData[12 + 1] & 0xff));
+
+	receivePressureSuccess = 1;
+}
+
 /*
  *	function	:	getState()
  *	description : 	getState() is function for get drone state.
@@ -90,6 +113,19 @@ int CoDroneClass::getState()
 	ReceiveGetData(Req_State);
 	return droneState[2];
 }
+
+void CoDroneClass::getState(uint8_t *pData)
+{
+	droneState[0] = pData[0 + 1];
+	droneState[1] = pData[1 + 1];
+	droneState[2] = pData[2 + 1];
+	droneState[3] = pData[3 + 1];
+	droneState[4] = pData[4 + 1];
+	droneState[5] = pData[5 + 1];
+	droneState[6] = pData[6 + 1];
+
+	receiveStateSuccess = 1;
+}
 /*
  *	function	:	getHeight()
  *	description : 	getHeight() is function for get height from IR distance sensor.
@@ -102,7 +138,21 @@ int CoDroneClass::getState()
 int CoDroneClass::getHeight()
 {
 	ReceiveGetData(Req_Range);
+	Serial.print("Height : ");
+	Serial.println(sensorRange[5]);
 	return sensorRange[5];
+}
+
+void CoDroneClass::getSensorData(uint8_t *pData)
+{
+	sensorRange[0] = ((pData[1 + 1] << 8) | (pData[0 + 1] & 0xff));		//left
+	sensorRange[1] = ((pData[3 + 1] << 8) | (pData[2 + 1] & 0xff));		//front
+	sensorRange[2] = ((pData[5 + 1] << 8) | (pData[4 + 1] & 0xff));		//right
+	sensorRange[3] = ((pData[7 + 1] << 8) | (pData[6 + 1] & 0xff));		//rear
+	sensorRange[4] = ((pData[9 + 1] << 8) | (pData[8 + 1] & 0xff));		//top
+	sensorRange[5] = ((pData[11 + 1] << 8) | (pData[10 + 1] & 0xff)); //bottom
+
+	receiveRangeSuccess = 1;
 }
 
 /*
@@ -119,6 +169,8 @@ int CoDroneClass::getHeight()
 int CoDroneClass::getBatteryPercentage()
 {
 	ReceiveGetData(Req_Battery);
+	Serial.print("Batter percentage : ");
+	Serial.print(batteryPercent);
 	return batteryPercent;
 }
 
@@ -135,7 +187,29 @@ int CoDroneClass::getBatteryPercentage()
 int CoDroneClass::getBatteryVoltage()
 {
 	ReceiveGetData(Req_Battery);
+	Serial.print("Batter Voltage : ");
+	Serial.print(batteryVoltage);
 	return batteryVoltage;
+}
+
+void CoDroneClass::getBatteryData(uint8_t *pData)
+{
+	// already plus one for everything
+	int batteryV30 = ((pData[2] << 8) | (pData[1] & 0xff));
+	int batteryV33 = ((pData[4] << 8) | (pData[3] & 0xff));
+	int batteryGradient = ((pData[6] << 8) | (pData[5] & 0xff));
+	int batteryyIntercept = ((pData[8] << 8) | (pData[7] & 0xff));
+	int flagBatteryCalibration = pData[8];
+	int batteryRaw = ((pData[13] << 32) | (pData[12] << 16) | (pData[11] << 8) | (pData[10] & 0xff));
+	batteryPercent = pData[14];
+	batteryVoltage = ((pData[16] << 8) | (pData[15] & 0xff));
+
+	Serial.print("Battery ");
+	Serial.println(batteryPercent);
+	Serial.print("Voltage ");
+	Serial.println(batteryVoltage);
+
+	receiveBatterySuccess = 1;
 }
 
 /*
@@ -158,6 +232,23 @@ acceldata CoDroneClass::getAccelerometer()
 	result.y = ImuAccY;
 	result.z = ImuAccZ;
 	return result;
+}
+
+void CoDroneClass::getImuRawAndAngle(uint8_t *pData)
+{
+	ImuAccX = (pData[3 + 1] << 8) | (pData[2 + 1]);	 // x and y are switched
+	ImuAccY = (pData[1 + 1] << 8) | (pData[0 + 1]);	 // x and y are switched
+	ImuAccZ = -(pData[5 + 1] << 8) | (pData[4 + 1]); // y needs to be flipped to have gravity be negative
+
+	ImuGyroRoll = (pData[7 + 1] << 8) | (pData[6 + 1]);
+	ImuGyroPitch = (pData[9 + 1] << 8) | (pData[8 + 1]);
+	ImuGyroYaw = (pData[11 + 1] << 8) | (pData[10 + 1]);
+
+	ImuAngleRoll = (pData[13 + 1] << 8) | (pData[12 + 1]);
+	ImuAnglePitch = (pData[15 + 1] << 8) | (pData[14 + 1]);
+	ImuAngleYaw = (pData[17 + 1] << 8) | (pData[16 + 1]);
+
+	receiveAccelSuccess = 1;
 }
 
 /*
@@ -259,11 +350,13 @@ angledata CoDroneClass::getGyroAngles()
  */
 boolean CoDroneClass::isUpsideDown()
 {
-	if(getState() == fMode_Flip)
+	if (getState() == fMode_Flip)
+	{
+		Serial.println("is Upside down");
 		return true;
+	}
 	return false;
 }
-
 
 /*
  *	function	:	isFlying()
@@ -274,14 +367,14 @@ boolean CoDroneClass::isUpsideDown()
  */
 boolean CoDroneClass::isFlying()
 {
-	if(getState() == fMode_Flight){
-    Serial.println("is Flying");
-    return true;
-  }
-  Serial.println("is not Flying");
+	if (getState() == fMode_Flight)
+	{
+		Serial.println("is Flying");
+		return true;
+	}
+	Serial.println("is not Flying");
 	return false;
 }
-
 
 /*
  *	function	:	isReadyToFly()
@@ -292,7 +385,7 @@ boolean CoDroneClass::isFlying()
  */
 boolean CoDroneClass::isReadyToFly()
 {
-	if(getState() == fMode_Ready)
+	if (getState() == fMode_Ready)
 		return true;
 	return false;
 }
@@ -306,10 +399,9 @@ boolean CoDroneClass::isReadyToFly()
  */
 boolean CoDroneClass::lowBatteryCheck()
 {
-	if(getBatteryPercentage() <=30)
+	if (getBatteryPercentage() <= 30)
 		return true;
 	return false;
 }
 
 //-------------------------------------------------------------------------------------------------------//
-

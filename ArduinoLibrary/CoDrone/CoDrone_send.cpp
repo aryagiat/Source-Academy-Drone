@@ -75,28 +75,28 @@ void CoDroneClass::Send_Processing(byte _data[], byte _length, byte _crc[])
 	sendingData = false;		//data sending end
 }
 
-void CoDroneClass::Send_Check(byte _data[], byte _length, byte _crc[])
-{
-	if(sendCheckFlag == 1)
-	{
-		timeOutSendPreviousMillis = millis();
+// void CoDroneClass::Send_Check(byte _data[], byte _length, byte _crc[])
+// {
+// 	if(sendCheckFlag == 1)
+// 	{
+// 		timeOutSendPreviousMillis = millis();
 		
-		while(sendCheckFlag != 3)
-		{
-			while(!TimeOutSendCheck(SEND_CHECK_TIME))
-			{
-				Receive();
-				if(sendCheckFlag == 3) break;
-			}
-			if(sendCheckFlag == 3) break;
-			if(sendCheckCount == 3) break;			//check count 
-			Send_Processing(_data,_length,_crc);
-			sendCheckCount++;
-		}
-		sendCheckFlag = 0;
-		sendCheckCount = 0;
-	}	
-}
+// 		while(sendCheckFlag != 3)
+// 		{
+// 			while(!TimeOutSendCheck(SEND_CHECK_TIME))
+// 			{
+// 				Receive();
+// 				if(sendCheckFlag == 3) break;
+// 			}
+// 			if(sendCheckFlag == 3) break;
+// 			if(sendCheckCount == 3) break;			//check count 
+// 			Send_Processing(_data,_length,_crc);
+// 			sendCheckCount++;
+// 		}
+// 		sendCheckFlag = 0;
+// 		sendCheckCount = 0;
+// 	}	
+// }
 //-------------------------------------------------------------------------------------------------------//
 
 
@@ -703,7 +703,7 @@ void CoDroneClass::goToHeight(int _range)
 	int value = getHeight();
 	if (value < _range)			_dir = 1;	// up
 	else if(value > _range)	_dir = -1;	// down
-	//-------------------------------------------------------:--------//
+	//---------------------------------------------------------------//
 	while(1)
 	{
 		value = getHeight();
@@ -1005,19 +1005,19 @@ void CoDroneClass::BattleBegin(byte teamSelect)
 }
 
 
-void CoDroneClass::BattleReceive()
-{
-	Receive();
-	if(irMessageReceive > 0)
-	{
-		if(team == TEAM_RED && irMessageReceive == BLUE_MISSILE || irMessageReceive == GREEN_MISSILE || irMessageReceive == YELLOW_MISSILE || irMessageReceive == FREE_MISSILE)	BattleDamageProcess();
-		else if(team == TEAM_BLUE && irMessageReceive == RED_MISSILE || irMessageReceive == GREEN_MISSILE || irMessageReceive == YELLOW_MISSILE || irMessageReceive == FREE_MISSILE)	BattleDamageProcess();
-		else if(team == TEAM_GREEN && irMessageReceive == BLUE_MISSILE || irMessageReceive == RED_MISSILE || irMessageReceive == YELLOW_MISSILE || irMessageReceive == FREE_MISSILE)	BattleDamageProcess();
-		else if(team == TEAM_YELLOW &&  irMessageReceive == BLUE_MISSILE || irMessageReceive == GREEN_MISSILE || irMessageReceive == RED_MISSILE || irMessageReceive == FREE_MISSILE)	BattleDamageProcess();
-		else if(team == FREE_PLAY && irMessageReceive == RED_MISSILE || irMessageReceive == BLUE_MISSILE || irMessageReceive == GREEN_MISSILE || irMessageReceive == YELLOW_MISSILE || irMessageReceive == FREE_MISSILE)	BattleDamageProcess();
-		irMessageReceive = 0;
-	}
-}
+// void CoDroneClass::BattleReceive()
+// {
+// 	Receive();
+// 	if(irMessageReceive > 0)
+// 	{
+// 		if(team == TEAM_RED && irMessageReceive == BLUE_MISSILE || irMessageReceive == GREEN_MISSILE || irMessageReceive == YELLOW_MISSILE || irMessageReceive == FREE_MISSILE)	BattleDamageProcess();
+// 		else if(team == TEAM_BLUE && irMessageReceive == RED_MISSILE || irMessageReceive == GREEN_MISSILE || irMessageReceive == YELLOW_MISSILE || irMessageReceive == FREE_MISSILE)	BattleDamageProcess();
+// 		else if(team == TEAM_GREEN && irMessageReceive == BLUE_MISSILE || irMessageReceive == RED_MISSILE || irMessageReceive == YELLOW_MISSILE || irMessageReceive == FREE_MISSILE)	BattleDamageProcess();
+// 		else if(team == TEAM_YELLOW &&  irMessageReceive == BLUE_MISSILE || irMessageReceive == GREEN_MISSILE || irMessageReceive == RED_MISSILE || irMessageReceive == FREE_MISSILE)	BattleDamageProcess();
+// 		else if(team == FREE_PLAY && irMessageReceive == RED_MISSILE || irMessageReceive == BLUE_MISSILE || irMessageReceive == GREEN_MISSILE || irMessageReceive == YELLOW_MISSILE || irMessageReceive == FREE_MISSILE)	BattleDamageProcess();
+// 		irMessageReceive = 0;
+// 	}
+// }
 
 
 void CoDroneClass::BattleShooting()
