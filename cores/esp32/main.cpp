@@ -41,14 +41,5 @@ void loopTask(void *pvParameters)
     }
 }
 
-extern "C" void app_main()
-{
-#if ARDUINO_SERIAL_PORT //Serial used for USB CDC
-    USB.begin();
-#endif
-    loopTaskWDTEnabled = false;
-    initArduino();
-    xTaskCreateUniversal(loopTask, "loopTask", CONFIG_ARDUINO_LOOP_STACK_SIZE, NULL, 1, &loopTaskHandle, ARDUINO_RUNNING_CORE);
-}
 
 #endif
